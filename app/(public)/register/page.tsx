@@ -1,3 +1,4 @@
+import { RegisterBasicInfoSection } from "./_components/RegisterBasicInfoSection";
 import { RegisterIntroCard } from "./_components/RegisterIntroCard";
 import { RegisterPageHeader } from "./_components/RegisterPageHeader";
 
@@ -7,6 +8,7 @@ export default function RegisterPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <RegisterPageHeader />
         <RegisterIntroCard />
+        <RegisterBasicInfoSection />
       </div>
     </main>
   );
