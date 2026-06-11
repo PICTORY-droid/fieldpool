@@ -1,4 +1,5 @@
 import { RegisterBasicInfoSection } from "./_components/RegisterBasicInfoSection";
+import { RegisterDetailInfoSection } from "./_components/RegisterDetailInfoSection";
 import { RegisterIntroCard } from "./_components/RegisterIntroCard";
 import { RegisterPageHeader } from "./_components/RegisterPageHeader";
 import { RegisterWorkInfoSection } from "./_components/RegisterWorkInfoSection";
@@ -11,6 +12,7 @@ export default function RegisterPage() {
         <RegisterIntroCard />
         <RegisterBasicInfoSection />
         <RegisterWorkInfoSection />
+        <RegisterDetailInfoSection />
       </div>
     </main>
   );
