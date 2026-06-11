@@ -1,6 +1,7 @@
 import { RegisterBasicInfoSection } from "./_components/RegisterBasicInfoSection";
 import { RegisterConsentSection } from "./_components/RegisterConsentSection";
 import { RegisterDetailInfoSection } from "./_components/RegisterDetailInfoSection";
+import { RegisterForm } from "./_components/RegisterForm.client";
 import { RegisterIntroCard } from "./_components/RegisterIntroCard";
 import { RegisterPageHeader } from "./_components/RegisterPageHeader";
 import { RegisterSubmitSection } from "./_components/RegisterSubmitSection";
@@ -13,13 +14,13 @@ export default function RegisterPage() {
         <RegisterPageHeader />
         <RegisterIntroCard />
 
-        <form className="flex flex-col gap-6">
+        <RegisterForm>
           <RegisterBasicInfoSection />
           <RegisterWorkInfoSection />
           <RegisterDetailInfoSection />
           <RegisterConsentSection />
           <RegisterSubmitSection />
-        </form>
+        </RegisterForm>
       </div>
     </main>
   );
