@@ -12,11 +12,14 @@ export default function RegisterPage() {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <RegisterPageHeader />
         <RegisterIntroCard />
-        <RegisterBasicInfoSection />
-        <RegisterWorkInfoSection />
-        <RegisterDetailInfoSection />
-        <RegisterConsentSection />
-        <RegisterSubmitSection />
+
+        <form className="flex flex-col gap-6">
+          <RegisterBasicInfoSection />
+          <RegisterWorkInfoSection />
+          <RegisterDetailInfoSection />
+          <RegisterConsentSection />
+          <RegisterSubmitSection />
+        </form>
       </div>
     </main>
   );
