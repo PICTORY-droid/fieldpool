@@ -18,7 +18,6 @@ export function RegisterConsentSection() {
           id="consentPrivacy"
           label="인력풀 등록과 직업상담을 위한 개인정보 수집 및 이용에 동의합니다."
           name="consentPrivacy"
-          required
         />
 
         <p className="mt-3 text-xs leading-5 text-neutral-500">
