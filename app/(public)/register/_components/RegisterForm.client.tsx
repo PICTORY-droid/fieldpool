@@ -36,7 +36,7 @@ export function RegisterForm({ children }: RegisterFormProps) {
       {result ? <RegisterFormErrors errors={result.errors} /> : null}
 
       {result?.ok && result.preview ? (
-        <RegisterFormMessage preview={result.preview} />
+        <RegisterFormMessage />
       ) : null}
 
       {isPending ? (
