@@ -1,9 +1,16 @@
 import Link from "next/link";
 
+import {
+  WORKER_STATUS,
+  WORKER_STATUS_LABELS,
+  type WorkerStatus,
+} from "../../../features/workers/constants/worker-status";
 import { getWorkerRecords } from "../../../features/workers/server/get-worker-records";
 import { requireAdminAuth } from "../../../server/security/admin-auth";
 
 export const dynamic = "force-dynamic";
+
+const WORKER_STATUS_VALUES = Object.values(WORKER_STATUS);
 
 export default async function AdminWorkersPage() {
   await requireAdminAuth();
@@ -64,7 +71,7 @@ export default async function AdminWorkersPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-bold">{worker.name}</h3>
                         <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-700">
-                          {worker.status}
+                          {formatWorkerStatus(worker.status)}
                         </span>
                       </div>
 
@@ -153,6 +160,18 @@ export default async function AdminWorkersPage() {
       </div>
     </main>
   );
+}
+
+function formatWorkerStatus(value: string) {
+  if (isWorkerStatus(value)) {
+    return WORKER_STATUS_LABELS[value];
+  }
+
+  return value;
+}
+
+function isWorkerStatus(value: string): value is WorkerStatus {
+  return WORKER_STATUS_VALUES.includes(value as WorkerStatus);
 }
 
 function formatDateTime(value: string) {
