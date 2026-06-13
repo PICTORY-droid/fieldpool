@@ -70,9 +70,18 @@ export default async function AdminWorkersPage() {
                       </p>
                     </div>
 
-                    <p className="text-sm text-neutral-500">
-                      {formatDateTime(worker.createdAt)}
-                    </p>
+                    <div className="flex flex-col gap-2 sm:items-end">
+                      <p className="text-sm text-neutral-500">
+                        {formatDateTime(worker.createdAt)}
+                      </p>
+
+                      <Link
+                        href={`/admin/workers/${worker.id}`}
+                        className="inline-flex h-9 items-center justify-center rounded-xl bg-neutral-950 px-3 text-sm font-semibold text-white"
+                      >
+                        상세 보기
+                      </Link>
+                    </div>
                   </div>
 
                   <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
