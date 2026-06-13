@@ -8,6 +8,7 @@ import {
   type WorkerStatus,
 } from "../../../../features/workers/constants/worker-status";
 import { getWorkerRecord } from "../../../../features/workers/server/get-worker-record";
+import { requireAdminAuth } from "../../../../server/security/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,8 @@ const WORKER_STATUS_VALUES = Object.values(WORKER_STATUS);
 export default async function AdminWorkerDetailPage({
   params,
 }: AdminWorkerDetailPageProps) {
+  await requireAdminAuth();
+
   const { workerId } = await params;
   const worker = await getWorkerRecord(workerId);
 
