@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { updateWorkerStatusAction } from "../../../../features/workers/actions/update-worker-status-action";
+import {
+  WORKER_STATUS,
+  WORKER_STATUS_LABELS,
+  type WorkerStatus,
+} from "../../../../features/workers/constants/worker-status";
 import { getWorkerRecord } from "../../../../features/workers/server/get-worker-record";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +16,8 @@ type AdminWorkerDetailPageProps = {
     workerId: string;
   }>;
 };
+
+const WORKER_STATUS_VALUES = Object.values(WORKER_STATUS);
 
 export default async function AdminWorkerDetailPage({
   params,
@@ -46,10 +54,43 @@ export default async function AdminWorkerDetailPage({
             </div>
 
             <span className="w-fit rounded-full bg-neutral-100 px-3 py-1 text-sm font-semibold text-neutral-700">
-              {worker.status}
+              {formatWorkerStatus(worker.status)}
             </span>
           </div>
         </header>
+
+        <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold">상태 변경</h2>
+
+          <form action={updateWorkerStatusAction} className="mt-4 grid gap-3">
+            <input type="hidden" name="workerId" value={worker.id} />
+
+            <label className="grid gap-2">
+              <span className="text-sm font-semibold text-neutral-600">
+                작업자 상태
+              </span>
+
+              <select
+                name="status"
+                defaultValue={worker.status}
+                className="h-12 rounded-2xl border border-neutral-300 bg-white px-4 text-sm font-semibold text-neutral-950"
+              >
+                {WORKER_STATUS_VALUES.map((status) => (
+                  <option key={status} value={status}>
+                    {WORKER_STATUS_LABELS[status]}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              type="submit"
+              className="h-12 rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white"
+            >
+              상태 저장
+            </button>
+          </form>
+        </section>
 
         <section className="rounded-3xl bg-white p-5 shadow-sm">
           <h2 className="text-lg font-bold">기본 정보</h2>
@@ -104,7 +145,7 @@ export default async function AdminWorkerDetailPage({
           <h2 className="text-lg font-bold">관리 정보</h2>
 
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-            <InfoItem label="상태" value={worker.status} />
+            <InfoItem label="상태" value={formatWorkerStatus(worker.status)} />
             <InfoItem
               label="개인정보 동의"
               value={worker.consentPrivacy ? "동의" : "미동의"}
@@ -150,6 +191,18 @@ function formatGender(value: string) {
   }
 
   return "미입력";
+}
+
+function formatWorkerStatus(value: string) {
+  if (isWorkerStatus(value)) {
+    return WORKER_STATUS_LABELS[value];
+  }
+
+  return value;
+}
+
+function isWorkerStatus(value: string): value is WorkerStatus {
+  return WORKER_STATUS_VALUES.includes(value as WorkerStatus);
 }
 
 function formatDateTime(value: string) {
