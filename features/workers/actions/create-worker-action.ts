@@ -3,14 +3,16 @@
 import type { JobType } from "../constants/job-types";
 import type { LanguageOption } from "../constants/language-options";
 import type { Region } from "../constants/regions";
-import type { CreateWorkerInput } from "../types/worker.types";
+import { createWorkerRecord } from "../server/create-worker-record";
 import { normalizeWorkerInput } from "../server/normalize-worker-input";
 import { validateWorkerInput } from "../server/validate-worker-input";
+import type { CreateWorkerInput } from "../types/worker.types";
 
 export type CreateWorkerActionResult = {
   ok: boolean;
   errors: string[];
   preview: CreateWorkerInput | null;
+  workerId?: string;
 };
 
 export async function createWorkerAction(
@@ -46,10 +48,13 @@ export async function createWorkerAction(
     };
   }
 
+  const savedWorker = await createWorkerRecord(normalizedInput);
+
   return {
     ok: true,
     errors: [],
     preview: normalizedInput,
+    workerId: savedWorker.id,
   };
 }
 
