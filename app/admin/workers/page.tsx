@@ -1,10 +1,13 @@
 import Link from "next/link";
 
 import { getWorkerRecords } from "../../../features/workers/server/get-worker-records";
+import { requireAdminAuth } from "../../../server/security/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminWorkersPage() {
+  await requireAdminAuth();
+
   const workers = await getWorkerRecords();
 
   return (
