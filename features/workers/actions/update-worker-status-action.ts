@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import {
   WORKER_STATUS,
@@ -31,6 +32,8 @@ export async function updateWorkerStatusAction(
 
   revalidatePath("/admin/workers");
   revalidatePath(`/admin/workers/${workerId}`);
+
+  redirect(`/admin/workers/${workerId}`);
 }
 
 function isWorkerStatus(value: string): value is WorkerStatus {
