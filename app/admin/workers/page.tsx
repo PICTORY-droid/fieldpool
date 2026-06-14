@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AdminLogoutButton } from "../_components/AdminLogoutButton";
 import {
   WORKER_STATUS,
   WORKER_STATUS_LABELS,
@@ -35,12 +36,16 @@ export default async function AdminWorkersPage() {
               </p>
             </div>
 
-            <Link
-              href="/register"
-              className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white"
-            >
-              작업자 등록
-            </Link>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <AdminLogoutButton />
+
+              <Link
+                href="/register"
+                className="inline-flex h-11 items-center justify-center rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white"
+              >
+                작업자 등록
+              </Link>
+            </div>
           </div>
         </header>
 
