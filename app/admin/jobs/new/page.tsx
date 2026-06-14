@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
+import { createJobPostAction } from "../../../../features/jobs/actions/create-job-post-action";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
 
 const REGION_OPTIONS = [
@@ -55,8 +56,8 @@ export default async function AdminNewJobPage() {
                 새 구인 공고 등록
               </h1>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                현장명, 지역, 공종, 인원, 일당 조건을 입력해 내부 구인 공고
-                등록을 준비합니다.
+                현장명, 지역, 공종, 인원, 일당 조건을 입력해 내부 구인 공고를
+                등록합니다.
               </p>
             </div>
 
@@ -79,7 +80,10 @@ export default async function AdminNewJobPage() {
           </div>
         </header>
 
-        <form className="grid gap-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+        <form
+          action={createJobPostAction}
+          className="grid gap-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6"
+        >
           <section className="grid gap-4">
             <div>
               <h2 className="text-xl font-bold">기본 정보</h2>
@@ -96,6 +100,7 @@ export default async function AdminNewJobPage() {
                 <input
                   name="title"
                   type="text"
+                  required
                   placeholder="예, 세종 철근 작업자 모집"
                   className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
                 />
@@ -122,9 +127,7 @@ export default async function AdminNewJobPage() {
                   defaultValue=""
                   className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300"
                 >
-                  <option value="" disabled>
-                    지역 선택
-                  </option>
+                  <option value="">지역 선택</option>
                   {REGION_OPTIONS.map((region) => (
                     <option key={region} value={region}>
                       {region}
@@ -296,11 +299,6 @@ export default async function AdminNewJobPage() {
             />
           </section>
 
-          <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
-            현재 화면은 입력 UI 단계입니다. 다음 작업에서 저장 서버 액션을
-            연결하면 DB에 실제 공고가 등록됩니다.
-          </div>
-
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Link
               href="/admin/jobs"
@@ -309,11 +307,10 @@ export default async function AdminNewJobPage() {
               취소
             </Link>
             <button
-              type="button"
-              disabled
-              className="cursor-not-allowed rounded-full bg-slate-700 px-5 py-3 text-sm font-bold text-slate-400"
+              type="submit"
+              className="rounded-full bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
             >
-              저장 기능 연결 전
+              구인 공고 저장
             </button>
           </div>
         </form>
