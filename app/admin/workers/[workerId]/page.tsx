@@ -171,14 +171,26 @@ export default async function AdminWorkerDetailPage({
             없습니다. 테스트 데이터나 잘못 등록된 데이터만 삭제하세요.
           </p>
 
-          <form action={deleteWorkerAction} className="mt-4">
+          <form action={deleteWorkerAction} className="mt-4 grid gap-4">
             <input type="hidden" name="workerId" value={worker.id} />
+
+            <label className="flex gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-800">
+              <input
+                type="checkbox"
+                name="confirmDelete"
+                required
+                className="mt-1 h-4 w-4"
+              />
+              <span>
+                삭제하면 되돌릴 수 없다는 것을 확인했습니다.
+              </span>
+            </label>
 
             <button
               type="submit"
-              className="h-11 rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white"
+              className="h-11 w-fit rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white"
             >
-              작업자 삭제
+              확인 후 작업자 삭제
             </button>
           </form>
         </section>
