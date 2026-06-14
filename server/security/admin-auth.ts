@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const ADMIN_SESSION_COOKIE = "fieldpool_admin_session";
+const ADMIN_COOKIE_PATH = "/admin";
 
 export async function requireAdminAuth(): Promise<void> {
   const isAuthenticated = await isAdminAuthenticated();
@@ -30,14 +31,22 @@ export async function createAdminSession(): Promise<void> {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    path: "/admin",
+    path: ADMIN_COOKIE_PATH,
   });
 }
 
 export async function clearAdminSession(): Promise<void> {
   const cookieStore = await cookies();
 
-  cookieStore.delete(ADMIN_SESSION_COOKIE);
+  cookieStore.set({
+    name: ADMIN_SESSION_COOKIE,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: ADMIN_COOKIE_PATH,
+    maxAge: 0,
+  });
 }
 
 export function isValidAdminPassword(password: string): boolean {
