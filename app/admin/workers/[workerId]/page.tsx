@@ -9,6 +9,7 @@ import {
 } from "../../../../features/workers/constants/worker-status";
 import { getWorkerRecord } from "../../../../features/workers/server/get-worker-record";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
+import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +37,16 @@ export default async function AdminWorkerDetailPage({
     <main className="min-h-screen bg-neutral-100 px-4 py-6 text-neutral-950">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <header className="rounded-3xl bg-white p-5 shadow-sm">
-          <Link
-            href="/admin/workers"
-            className="text-sm font-semibold text-neutral-600"
-          >
-            ← 작업자 목록으로
-          </Link>
+          <div className="flex items-center justify-between gap-3">
+            <Link
+              href="/admin/workers"
+              className="text-sm font-semibold text-neutral-600"
+            >
+              ← 작업자 목록으로
+            </Link>
+
+            <AdminLogoutButton />
+          </div>
 
           <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
