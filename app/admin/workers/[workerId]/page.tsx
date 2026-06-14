@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { deleteWorkerAction } from "../../../../features/workers/actions/delete-worker-action";
 import { updateWorkerStatusAction } from "../../../../features/workers/actions/update-worker-status-action";
 import {
   WORKER_STATUS,
@@ -161,6 +162,25 @@ export default async function AdminWorkerDetailPage({
             <InfoItem label="등록일" value={formatDateTime(worker.createdAt)} />
             <InfoItem label="수정일" value={formatDateTime(worker.updatedAt)} />
           </dl>
+        </section>
+
+        <section className="rounded-3xl border border-red-200 bg-white p-5 shadow-sm">
+          <h2 className="text-lg font-bold text-red-700">위험 작업</h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-600">
+            이 작업자를 삭제하면 목록과 상세 화면에서 더 이상 확인할 수
+            없습니다. 테스트 데이터나 잘못 등록된 데이터만 삭제하세요.
+          </p>
+
+          <form action={deleteWorkerAction} className="mt-4">
+            <input type="hidden" name="workerId" value={worker.id} />
+
+            <button
+              type="submit"
+              className="h-11 rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white"
+            >
+              작업자 삭제
+            </button>
+          </form>
         </section>
       </div>
     </main>
