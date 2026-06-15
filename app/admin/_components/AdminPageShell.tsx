@@ -1,24 +1,24 @@
 import type { ReactNode } from "react";
 
-type AdminPageShellProps = {
-  children: ReactNode;
-};
+import { AdminMobileBottomNavigation } from "./AdminMobileBottomNavigation";
 
-export function AdminPageShell({ children }: AdminPageShellProps) {
+export function AdminPageShell({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-screen bg-[#f4f6f9] text-neutral-950">
-      <div className="border-b border-blue-900 bg-blue-950">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <p className="text-sm font-semibold text-white">Fieldpool 관리자</p>
-          <p className="hidden text-xs font-medium text-blue-100 sm:block">
+    <div className="min-h-screen bg-slate-100 pb-24 text-slate-950 md:pb-0">
+      <header className="border-b border-blue-900 bg-blue-950 text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 text-sm font-semibold sm:px-6 lg:px-8">
+          <span>Fieldpool 관리자</span>
+          <span className="hidden text-xs font-medium text-blue-100 sm:inline">
             건설 현장 인력풀 관리 시스템
-          </p>
+          </span>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {children}
-      </div>
-    </main>
+      </main>
+
+      <AdminMobileBottomNavigation />
+    </div>
   );
 }

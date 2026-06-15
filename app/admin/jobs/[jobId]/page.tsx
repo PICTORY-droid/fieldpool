@@ -1,21 +1,31 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
+import { AdminContent } from "../../_components/AdminContent";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
-import { AdminJobDangerZone } from "./_components/AdminJobDangerZone";
-import { AdminJobStatusForm } from "./_components/AdminJobStatusForm";
-import {
-  JOB_POST_STATUS_LABELS,
-} from "../../../../features/jobs/constants/job-post-status";
+import { AdminPageHeader } from "../../_components/AdminPageHeader";
+import { AdminPageShell } from "../../_components/AdminPageShell";
+import { JOB_POST_STATUS_LABELS } from "../../../../features/jobs/constants/job-post-status";
 import { matchWorkersToJob } from "../../../../features/jobs/matching/match-workers-to-job";
 import { getJobPost } from "../../../../features/jobs/server/get-job-post";
 import { getWorkerRecords } from "../../../../features/workers/server/get-worker-records";
 import { WORKER_STATUS_LABELS } from "../../../../features/workers/constants/worker-status";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
+import { AdminJobDangerZone } from "./_components/AdminJobDangerZone";
+import { AdminJobStatusForm } from "./_components/AdminJobStatusForm";
+
+export const dynamic = "force-dynamic";
 
 const JOB_POST_SOURCE_LABELS: Record<string, string> = {
   manual: "직접 등록",
   external: "외부 공고",
+};
+
+const JOB_POST_STATUS_CLASS_NAMES: Record<string, string> = {
+  open: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  paused: "border-amber-200 bg-amber-50 text-amber-700",
+  closed: "border-slate-200 bg-slate-100 text-slate-600",
 };
 
 type AdminJobDetailPageProps = {
@@ -49,12 +59,16 @@ function formatNeededCount(value: number | null | undefined) {
     return "-";
   }
 
-  return `${value}명`;
+  return `${value.toLocaleString("ko-KR")}명`;
 }
 
 function formatCareerYears(value: number | null | undefined) {
   if (value === null || value === undefined) {
     return "-";
+  }
+
+  if (value === 0) {
+    return "무관";
   }
 
   return `${value}년 이상`;
@@ -82,6 +96,56 @@ function formatWorkerStatus(status: string) {
   );
 }
 
+function formatJobStatus(status: string) {
+  return (
+    JOB_POST_STATUS_LABELS[status as keyof typeof JOB_POST_STATUS_LABELS] ??
+    status
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-900">
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function MatchReasonBox({
+  label,
+  tone,
+  value,
+}: {
+  label: string;
+  tone: "blue" | "amber";
+  value: string;
+}) {
+  const className =
+    tone === "blue"
+      ? "rounded-2xl border border-blue-100 bg-blue-50 p-4"
+      : "rounded-2xl border border-amber-100 bg-amber-50 p-4";
+
+  const labelClassName =
+    tone === "blue"
+      ? "text-sm font-bold text-blue-800"
+      : "text-sm font-bold text-amber-800";
+
+  const valueClassName =
+    tone === "blue"
+      ? "mt-2 text-sm leading-6 text-blue-900"
+      : "mt-2 text-sm leading-6 text-amber-900";
+
+  return (
+    <div className={className}>
+      <p className={labelClassName}>{label}</p>
+      <p className={valueClassName}>{value}</p>
+    </div>
+  );
+}
+
 export default async function AdminJobDetailPage({
   params,
 }: AdminJobDetailPageProps) {
@@ -99,240 +163,193 @@ export default async function AdminJobDetailPage({
   const exactMatchCount = workerMatches.filter((match) => match.isMatch).length;
 
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-8 text-slate-100">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/30">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-cyan-300">
-                Fieldpool 관리자
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200">
-                  {JOB_POST_STATUS_LABELS[jobPost.status] ?? jobPost.status}
-                </span>
-                <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
-                  {JOB_POST_SOURCE_LABELS[jobPost.sourceType] ??
-                    jobPost.sourceType}
-                </span>
-              </div>
-              <h1 className="mt-3 text-3xl font-bold tracking-tight">
-                {jobPost.title}
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
-                구인 공고 상세 정보와 조건에 맞는 작업자 매칭 결과를
-                확인합니다.
-              </p>
-            </div>
+    <AdminPageShell>
+      <AdminBreadcrumbs
+        items={[
+          { href: "/admin/jobs", label: "구인공고 목록" },
+          { label: jobPost.title },
+        ]}
+      />
 
-            <AdminLogoutButton />
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/jobs"
-              className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-            >
-              구인 공고 목록으로
-            </Link>
+      <AdminPageHeader
+        eyebrow="구인공고 상세"
+        title={jobPost.title}
+        description="구인공고의 현장 조건, 모집 상태, 작업자 매칭 결과를 확인합니다."
+        actions={
+          <div className="flex flex-wrap gap-2">
             <Link
               href="/admin/jobs/new"
-              className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
+              className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-blue-800 shadow-sm transition hover:bg-blue-50"
             >
               새 공고 등록
             </Link>
+
             <Link
               href="/admin/workers"
-              className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
             >
-              작업자 목록으로
+              작업자 목록
             </Link>
+
+            <AdminLogoutButton />
           </div>
-        </header>
+        }
+      />
+
+      <AdminContent>
+        <section className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">모집 상태</p>
+            <div className="mt-3">
+              <span
+                className={[
+                  "inline-flex rounded-full border px-3 py-1 text-sm font-bold",
+                  JOB_POST_STATUS_CLASS_NAMES[jobPost.status] ??
+                    "border-slate-200 bg-slate-100 text-slate-600",
+                ].join(" ")}
+              >
+                {formatJobStatus(jobPost.status)}
+              </span>
+            </div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              상태 변경은 아래 상태 저장 영역에서 처리합니다.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">전체 후보</p>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+              {workerMatches.length.toLocaleString("ko-KR")}명
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              등록된 작업자 중 조건 비교 대상입니다.
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-sm font-medium text-slate-500">완전 일치</p>
+            <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+              {exactMatchCount.toLocaleString("ko-KR")}명
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              지역, 공종, 경력, 차량, 숙소 조건이 맞는 작업자입니다.
+            </p>
+          </div>
+        </section>
 
         <AdminJobStatusForm
           jobPostId={jobPost.id}
           currentStatus={jobPost.status}
         />
 
-        <section className="grid gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div>
-            <h2 className="text-xl font-bold">기본 정보</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              현장과 공고 출처를 확인합니다.
-            </p>
+            <p className="text-sm font-semibold text-blue-700">기본 정보</p>
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
+              현장과 공고 정보
+            </h2>
           </div>
 
-          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">공고명</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {jobPost.title}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">현장명</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {jobPost.siteName || "-"}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">지역</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {jobPost.region || "-"}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4 sm:col-span-2 lg:col-span-3">
-              <dt className="text-slate-500">주소</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {jobPost.address || "-"}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">상태</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {JOB_POST_STATUS_LABELS[jobPost.status] ?? jobPost.status}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">등록 방식</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {JOB_POST_SOURCE_LABELS[jobPost.sourceType] ??
-                  jobPost.sourceType}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">등록일</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatDate(jobPost.createdAt)}
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="grid gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-          <div>
-            <h2 className="text-xl font-bold">모집 조건</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              작업자 자동 매칭에 사용할 조건입니다.
-            </p>
-          </div>
-
-          <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">필요 공종</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {jobPost.jobTypes.length > 0
-                  ? jobPost.jobTypes.join(", ")
-                  : "-"}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">필요 인원</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatNeededCount(jobPost.neededCount)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">일당</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatPay(jobPost.pay)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">시작일</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatDate(jobPost.startDate)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">종료일</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatDate(jobPost.endDate)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">필요 경력</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatCareerYears(jobPost.careerYears)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">차량</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatVehicle(jobPost.requiresVehicle)}
-              </dd>
-            </div>
-
-            <div className="rounded-xl bg-slate-950/60 p-4">
-              <dt className="text-slate-500">숙소</dt>
-              <dd className="mt-1 font-semibold text-slate-100">
-                {formatLodging(jobPost.providesLodging)}
-              </dd>
-            </div>
-          </dl>
-        </section>
-
-        <section className="grid gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
-          <div>
-            <h2 className="text-xl font-bold">메모</h2>
-            <p className="mt-1 text-sm text-slate-400">
-              관리자 참고사항입니다.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 text-sm leading-6 text-slate-300">
-            {jobPost.memo || "등록된 메모가 없습니다."}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem label="공고명" value={jobPost.title} />
+            <InfoItem label="현장명" value={jobPost.siteName || "-"} />
+            <InfoItem label="지역" value={jobPost.region || "-"} />
+            <InfoItem label="주소" value={jobPost.address || "-"} />
+            <InfoItem label="상태" value={formatJobStatus(jobPost.status)} />
+            <InfoItem
+              label="등록 방식"
+              value={
+                JOB_POST_SOURCE_LABELS[jobPost.sourceType] ??
+                jobPost.sourceType
+              }
+            />
+            <InfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
           </div>
         </section>
 
-        <section className="grid gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div>
+            <p className="text-sm font-semibold text-blue-700">모집 조건</p>
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
+              작업자 매칭 조건
+            </h2>
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <InfoItem
+              label="필요 공종"
+              value={
+                jobPost.jobTypes.length > 0 ? jobPost.jobTypes.join(", ") : "-"
+              }
+            />
+            <InfoItem
+              label="필요 인원"
+              value={formatNeededCount(jobPost.neededCount)}
+            />
+            <InfoItem label="일당" value={formatPay(jobPost.pay)} />
+            <InfoItem label="시작일" value={formatDate(jobPost.startDate)} />
+            <InfoItem label="종료일" value={formatDate(jobPost.endDate)} />
+            <InfoItem
+              label="필요 경력"
+              value={formatCareerYears(jobPost.careerYears)}
+            />
+            <InfoItem label="차량" value={formatVehicle(jobPost.requiresVehicle)} />
+            <InfoItem label="숙소" value={formatLodging(jobPost.providesLodging)} />
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div>
+            <p className="text-sm font-semibold text-blue-700">메모</p>
+            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
+              관리자 참고사항
+            </h2>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+            <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
+              {jobPost.memo || "등록된 메모가 없습니다."}
+            </p>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="text-xl font-bold">매칭 작업자</h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="text-sm font-semibold text-blue-700">매칭 작업자</p>
+              <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
+                작업자 조건 비교
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
                 지역, 공종, 경력, 차량, 숙소 조건으로 작업자를 비교합니다.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="rounded-full bg-cyan-400/10 px-3 py-1 text-sm font-bold text-cyan-200">
+              <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
                 완전 일치 {exactMatchCount}명
               </span>
-              <span className="rounded-full bg-slate-800 px-3 py-1 text-sm font-semibold text-slate-300">
+              <span className="rounded-full border border-slate-200 bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-600">
                 전체 후보 {workerMatches.length}명
               </span>
             </div>
           </div>
 
           {workerMatches.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/40 p-8 text-center">
-              <p className="text-base font-semibold text-slate-200">
+            <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+              <p className="text-base font-semibold text-slate-900">
                 등록된 작업자가 없습니다.
               </p>
-              <p className="mt-2 text-sm text-slate-400">
-                /register 화면에서 작업자를 등록하면 이곳에 매칭 결과가
-                표시됩니다.
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                /register 화면에서 작업자를 등록하면 이곳에 매칭 결과가 표시됩니다.
               </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="mt-5 grid gap-4">
               {workerMatches.map((match) => (
                 <article
                   key={match.worker.id}
-                  className="rounded-2xl border border-slate-800 bg-slate-950/50 p-5"
+                  className="rounded-3xl border border-slate-200 bg-slate-50 p-5"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -340,115 +357,99 @@ export default async function AdminJobDetailPage({
                         <span
                           className={
                             match.isMatch
-                              ? "rounded-full bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-200"
-                              : "rounded-full bg-amber-400/10 px-3 py-1 text-xs font-bold text-amber-200"
+                              ? "rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700"
+                              : "rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700"
                           }
                         >
                           {match.isMatch ? "완전 일치" : "조건 확인 필요"}
                         </span>
-                        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
                           점수 {match.score}
                         </span>
-                        <span className="rounded-full bg-slate-800 px-3 py-1 text-xs font-semibold text-slate-300">
+                        <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
                           {formatWorkerStatus(match.worker.status)}
                         </span>
                       </div>
 
-                      <h3 className="mt-3 text-xl font-bold text-white">
+                      <h3 className="mt-3 text-xl font-bold text-slate-950">
                         {match.worker.name}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <p className="mt-1 text-sm text-slate-600">
                         {match.worker.phone}
                       </p>
                     </div>
 
                     <Link
                       href={`/admin/workers/${match.worker.id}`}
-                      className="rounded-full border border-slate-700 px-4 py-2 text-center text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
+                      className="inline-flex items-center justify-center rounded-2xl bg-blue-700 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
                     >
                       작업자 상세
                     </Link>
                   </div>
 
-                  <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">주 근무지역</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {match.worker.mainRegion || "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">가능 지역</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {match.worker.availableRegions.length > 0
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <InfoItem
+                      label="주 근무지역"
+                      value={match.worker.mainRegion || "-"}
+                    />
+                    <InfoItem
+                      label="가능 지역"
+                      value={
+                        match.worker.availableRegions.length > 0
                           ? match.worker.availableRegions.join(", ")
-                          : "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">공종</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {match.worker.jobTypes.length > 0
+                          : "-"
+                      }
+                    />
+                    <InfoItem
+                      label="공종"
+                      value={
+                        match.worker.jobTypes.length > 0
                           ? match.worker.jobTypes.join(", ")
-                          : "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">경력</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {match.worker.careerYears === null
+                          : "-"
+                      }
+                    />
+                    <InfoItem
+                      label="경력"
+                      value={
+                        match.worker.careerYears === null
                           ? "-"
-                          : `${match.worker.careerYears}년`}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">희망 일당</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {formatPay(match.worker.desiredPay)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">차량</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {formatWorkerVehicle(match.worker.hasVehicle)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-900 p-3">
-                      <dt className="text-slate-500">숙소</dt>
-                      <dd className="mt-1 font-semibold text-slate-200">
-                        {formatWorkerLodging(match.worker.canLodging)}
-                      </dd>
-                    </div>
-                  </dl>
+                          : `${match.worker.careerYears}년`
+                      }
+                    />
+                    <InfoItem
+                      label="희망 일당"
+                      value={formatPay(match.worker.desiredPay)}
+                    />
+                    <InfoItem
+                      label="차량"
+                      value={formatWorkerVehicle(match.worker.hasVehicle)}
+                    />
+                    <InfoItem
+                      label="숙소"
+                      value={formatWorkerLodging(match.worker.canLodging)}
+                    />
+                  </div>
 
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
-                    <div className="rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-3">
-                      <p className="text-sm font-bold text-cyan-200">
-                        맞는 조건
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        {match.matchedReasons.length > 0
+                    <MatchReasonBox
+                      label="맞는 조건"
+                      tone="blue"
+                      value={
+                        match.matchedReasons.length > 0
                           ? match.matchedReasons.join(", ")
-                          : "-"}
-                      </p>
-                    </div>
+                          : "-"
+                      }
+                    />
 
-                    <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-3">
-                      <p className="text-sm font-bold text-amber-200">
-                        확인할 조건
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        {match.unmatchedReasons.length > 0
+                    <MatchReasonBox
+                      label="확인할 조건"
+                      tone="amber"
+                      value={
+                        match.unmatchedReasons.length > 0
                           ? match.unmatchedReasons.join(", ")
-                          : "-"}
-                      </p>
-                    </div>
+                          : "-"
+                      }
+                    />
                   </div>
                 </article>
               ))}
@@ -457,7 +458,7 @@ export default async function AdminJobDetailPage({
         </section>
 
         <AdminJobDangerZone jobPostId={jobPost.id} />
-      </div>
-    </main>
+      </AdminContent>
+    </AdminPageShell>
   );
 }

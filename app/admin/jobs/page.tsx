@@ -5,37 +5,69 @@ import { AdminLogoutButton } from "../_components/AdminLogoutButton";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPageShell } from "../_components/AdminPageShell";
 import { getJobPosts } from "../../../features/jobs/server/get-job-posts";
+import type { JobPost } from "../../../features/jobs/types/job-post.types";
 import { requireAdminAuth } from "../../../server/security/admin-auth";
 
-const JOB_POST_STATUS_LABELS: Record<string, string> = {
+export const metadata = {
+  title: "구인공고 목록 | Fieldpool 관리자",
+  description: "Fieldpool 관리자 구인공고 목록 화면입니다.",
+};
+
+const JOB_STATUS_LABELS: Record<JobPost["status"], string> = {
   open: "모집중",
   paused: "일시중지",
   closed: "마감",
 };
 
-const JOB_POST_SOURCE_LABELS: Record<string, string> = {
-  manual: "직접 등록",
-  external: "외부 공고",
+const JOB_STATUS_CLASS_NAMES: Record<JobPost["status"], string> = {
+  open: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  paused: "border-amber-200 bg-amber-50 text-amber-700",
+  closed: "border-slate-200 bg-slate-100 text-slate-600",
 };
 
-function formatDate(value: Date | string | null | undefined) {
+const JOB_SOURCE_LABELS: Record<JobPost["sourceType"], string> = {
+  manual: "직접 등록",
+  external: "외부 후보",
+};
+
+function formatDate(value: Date | string | null) {
   if (!value) {
     return "-";
   }
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Date(value).toLocaleDateString("ko-KR", {
     year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(value));
+    month: "numeric",
+    day: "numeric",
+  });
 }
 
-function formatPay(value: number | null | undefined) {
-  if (value === null || value === undefined) {
+function formatCurrency(value: number | null) {
+  if (value === null) {
     return "-";
   }
 
   return `${value.toLocaleString("ko-KR")}원`;
+}
+
+function formatCount(value: number | null) {
+  if (value === null) {
+    return "-";
+  }
+
+  return `${value.toLocaleString("ko-KR")}명`;
+}
+
+function formatCareerYears(value: number | null) {
+  if (value === null) {
+    return "-";
+  }
+
+  if (value === 0) {
+    return "무관";
+  }
+
+  return `${value}년 이상`;
 }
 
 function formatBoolean(value: boolean) {
@@ -46,186 +78,198 @@ function formatLodging(value: boolean) {
   return value ? "제공" : "미제공";
 }
 
+function JobSummaryCard({
+  description,
+  label,
+  value,
+}: {
+  description: string;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
+        {value}
+      </p>
+      <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+    </div>
+  );
+}
+
+function JobInfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+      <p className="text-xs font-medium text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
+    </div>
+  );
+}
+
+function JobPostCard({ jobPost }: { jobPost: JobPost }) {
+  return (
+    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md sm:p-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0 space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={[
+                "inline-flex rounded-full border px-3 py-1 text-xs font-semibold",
+                JOB_STATUS_CLASS_NAMES[jobPost.status],
+              ].join(" ")}
+            >
+              {JOB_STATUS_LABELS[jobPost.status]}
+            </span>
+
+            <span className="inline-flex rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+              {JOB_SOURCE_LABELS[jobPost.sourceType]}
+            </span>
+          </div>
+
+          <div>
+            <h2 className="truncate text-xl font-bold tracking-tight text-slate-950">
+              {jobPost.title}
+            </h2>
+            <p className="mt-2 text-sm font-medium text-slate-600">
+              {jobPost.siteName || "현장명 미입력"}
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href={`/admin/jobs/${jobPost.id}`}
+          className="inline-flex items-center justify-center rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+        >
+          상세 보기
+        </Link>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <JobInfoItem label="지역" value={jobPost.region || "-"} />
+        <JobInfoItem
+          label="공종"
+          value={jobPost.jobTypes.length > 0 ? jobPost.jobTypes.join(", ") : "-"}
+        />
+        <JobInfoItem label="필요 인원" value={formatCount(jobPost.neededCount)} />
+        <JobInfoItem label="일당" value={formatCurrency(jobPost.pay)} />
+        <JobInfoItem
+          label="근무 시작"
+          value={formatDate(jobPost.startDate)}
+        />
+        <JobInfoItem label="근무 종료" value={formatDate(jobPost.endDate)} />
+        <JobInfoItem
+          label="필요 경력"
+          value={formatCareerYears(jobPost.careerYears)}
+        />
+        <JobInfoItem label="차량" value={formatBoolean(jobPost.requiresVehicle)} />
+        <JobInfoItem label="숙소" value={formatLodging(jobPost.providesLodging)} />
+        <JobInfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
+      </div>
+
+      {jobPost.memo ? (
+        <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+          <p className="text-xs font-medium text-slate-500">메모</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+            {jobPost.memo}
+          </p>
+        </div>
+      ) : null}
+    </article>
+  );
+}
+
 export default async function AdminJobsPage() {
   await requireAdminAuth();
 
   const jobPosts = await getJobPosts();
+  const latestJobPost = jobPosts[0] ?? null;
+  const openJobPostCount = jobPosts.filter(
+    (jobPost) => jobPost.status === "open",
+  ).length;
 
   return (
     <AdminPageShell>
       <AdminPageHeader
-        eyebrow="Fieldpool 관리자"
-        title="구인 공고 목록"
-        description="관리자가 직접 등록했거나 외부 공고에서 전환한 내부 구인 공고를 확인합니다."
-        actions={<AdminLogoutButton />}
+        eyebrow="구인공고 관리"
+        title="구인공고 목록"
+        description="등록된 현장 구인공고의 모집 상태, 공종, 지역, 근무 조건을 확인하고 작업자 매칭으로 이어갈 수 있습니다."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/workers"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              작업자 목록으로
+            </Link>
+            <Link
+              href="/admin/external-jobs"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              외부 공고 후보
+            </Link>
+            <Link
+              href="/admin/jobs/new"
+              className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-blue-800 shadow-sm transition hover:bg-blue-50"
+            >
+              구인공고 등록
+            </Link>
+            <AdminLogoutButton />
+          </div>
+        }
       />
 
       <AdminContent>
-        <nav className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/workers"
-            className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
-          >
-            작업자 목록으로
-          </Link>
-          <Link
-            href="/admin/external-jobs"
-            className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
-          >
-            외부 공고 후보
-          </Link>
-          <Link
-            href="/admin/jobs/new"
-            className="rounded-full bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
-          >
-            새 공고 등록
-          </Link>
-        </nav>
-
-        <section className="grid gap-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-bold text-neutral-950">
-                최근 구인 공고
-              </h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                등록된 공고를 최근 등록순으로 표시합니다.
-              </p>
-            </div>
-
-            <p className="rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-700">
-              {jobPosts.length}건
-            </p>
-          </div>
-
-          {jobPosts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-center">
-              <p className="text-base font-semibold text-neutral-800">
-                등록된 구인 공고가 없습니다.
-              </p>
-              <p className="mt-2 text-sm text-neutral-500">
-                새 공고 등록 화면에서 관리자 직접 공고를 먼저 등록하세요.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {jobPosts.map((jobPost) => (
-                <article
-                  key={jobPost.id}
-                  className="rounded-2xl border border-neutral-200 bg-neutral-50 p-5"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-                          {JOB_POST_STATUS_LABELS[jobPost.status] ??
-                            jobPost.status}
-                        </span>
-                        <span className="rounded-full bg-neutral-200 px-3 py-1 text-xs font-semibold text-neutral-700">
-                          {JOB_POST_SOURCE_LABELS[jobPost.sourceType] ??
-                            jobPost.sourceType}
-                        </span>
-                      </div>
-
-                      <h3 className="mt-3 text-xl font-bold text-neutral-950">
-                        {jobPost.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-neutral-500">
-                        {jobPost.siteName || "현장명 미입력"}
-                      </p>
-                    </div>
-
-                    <Link
-                      href={`/admin/jobs/${jobPost.id}`}
-                      className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-center text-sm font-semibold text-neutral-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
-                    >
-                      상세 보기
-                    </Link>
-                  </div>
-
-                  <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">지역</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {jobPost.region || "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">공종</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {jobPost.jobTypes.length > 0
-                          ? jobPost.jobTypes.join(", ")
-                          : "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">필요 인원</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {jobPost.neededCount
-                          ? `${jobPost.neededCount}명`
-                          : "-"}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">일당</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {formatPay(jobPost.pay)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">근무 기간</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {formatDate(jobPost.startDate)} ~{" "}
-                        {formatDate(jobPost.endDate)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">필요 경력</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {jobPost.careerYears === null ||
-                        jobPost.careerYears === undefined
-                          ? "-"
-                          : `${jobPost.careerYears}년 이상`}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">차량</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {formatBoolean(jobPost.requiresVehicle)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">숙소</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {formatLodging(jobPost.providesLodging)}
-                      </dd>
-                    </div>
-
-                    <div className="rounded-xl border border-neutral-200 bg-white p-3">
-                      <dt className="text-neutral-500">등록일</dt>
-                      <dd className="mt-1 font-semibold text-neutral-800">
-                        {formatDate(jobPost.createdAt)}
-                      </dd>
-                    </div>
-                  </dl>
-
-                  {jobPost.memo ? (
-                    <p className="mt-4 rounded-xl border border-neutral-200 bg-white p-3 text-sm leading-6 text-neutral-600">
-                      {jobPost.memo}
-                    </p>
-                  ) : null}
-                </article>
-              ))}
-            </div>
-          )}
+        <section className="grid gap-4 md:grid-cols-3">
+          <JobSummaryCard
+            label="등록 공고"
+            value={`${jobPosts.length.toLocaleString("ko-KR")}건`}
+            description="관리자 화면에 등록된 전체 구인공고 수입니다."
+          />
+          <JobSummaryCard
+            label="모집중"
+            value={`${openJobPostCount.toLocaleString("ko-KR")}건`}
+            description="현재 작업자 매칭을 진행할 수 있는 공고입니다."
+          />
+          <JobSummaryCard
+            label="최근 공고"
+            value={latestJobPost?.title ?? "-"}
+            description="가장 최근 등록된 구인공고를 기준으로 표시합니다."
+          />
         </section>
+
+        <section className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
+          <p className="text-sm font-semibold text-blue-900">관리 안내</p>
+          <p className="mt-2 text-sm leading-6 text-blue-800">
+            모집중, 일시중지, 마감 상태는 공고 상세 화면에서 변경합니다. 목록에서는
+            공고 조건과 등록 상태를 먼저 확인한 뒤 상세 보기로 이동하세요.
+          </p>
+        </section>
+
+        {jobPosts.length > 0 ? (
+          <section className="grid gap-4">
+            {jobPosts.map((jobPost) => (
+              <JobPostCard key={jobPost.id} jobPost={jobPost} />
+            ))}
+          </section>
+        ) : (
+          <section className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+            <p className="text-lg font-bold text-slate-950">
+              등록된 구인공고가 없습니다.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              새 구인공고를 등록하면 이곳에서 모집 상태와 현장 조건을 확인할 수 있습니다.
+            </p>
+            <div className="mt-5">
+              <Link
+                href="/admin/jobs/new"
+                className="inline-flex items-center justify-center rounded-2xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+              >
+                구인공고 등록
+              </Link>
+            </div>
+          </section>
+        )}
       </AdminContent>
     </AdminPageShell>
   );
