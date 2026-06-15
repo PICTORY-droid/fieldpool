@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
 import { createJobPostAction } from "../../../../features/jobs/actions/create-job-post-action";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
+import { AdminJobCreateSubmitButton } from "./_components/AdminJobCreateSubmitButton";
 
 const REGION_OPTIONS = [
   "서울",
@@ -306,12 +307,8 @@ export default async function AdminNewJobPage() {
             >
               취소
             </Link>
-            <button
-              type="submit"
-              className="rounded-full bg-cyan-400 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-cyan-300"
-            >
-              구인 공고 저장
-            </button>
+
+            <AdminJobCreateSubmitButton />
           </div>
         </form>
       </div>

@@ -1,9 +1,10 @@
+import { updateJobPostStatusAction } from "../../../../../features/jobs/actions/update-job-post-status-action";
 import {
   JOB_POST_STATUS_LABELS,
   JOB_POST_STATUS_VALUES,
 } from "../../../../../features/jobs/constants/job-post-status";
-import { updateJobPostStatusAction } from "../../../../../features/jobs/actions/update-job-post-status-action";
 import type { JobPostStatus } from "../../../../../features/jobs/types/job-post.types";
+import { AdminJobStatusSubmitButton } from "./AdminJobStatusSubmitButton";
 
 type AdminJobStatusFormProps = {
   jobPostId: string;
@@ -44,12 +45,7 @@ export function AdminJobStatusForm({
           </select>
         </label>
 
-        <button
-          type="submit"
-          className="h-11 w-fit rounded-2xl bg-cyan-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
-        >
-          상태 저장
-        </button>
+        <AdminJobStatusSubmitButton />
       </form>
     </section>
   );

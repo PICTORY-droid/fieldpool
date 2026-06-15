@@ -1,4 +1,5 @@
 import { deleteJobPostAction } from "../../../../../features/jobs/actions/delete-job-post-action";
+import { AdminJobDeleteSubmitButton } from "./AdminJobDeleteSubmitButton";
 
 type AdminJobDangerZoneProps = {
   jobPostId: string;
@@ -26,12 +27,7 @@ export function AdminJobDangerZone({ jobPostId }: AdminJobDangerZoneProps) {
           <span>삭제하면 되돌릴 수 없다는 것을 확인했습니다.</span>
         </label>
 
-        <button
-          type="submit"
-          className="h-11 w-fit rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500"
-        >
-          확인 후 구인 공고 삭제
-        </button>
+        <AdminJobDeleteSubmitButton />
       </form>
     </section>
   );
