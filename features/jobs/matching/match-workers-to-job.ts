@@ -1,6 +1,6 @@
-import type { JobPost } from "../types/job-post.types";
+import type { WorkerRecord } from "../../workers/server/get-worker-records";
 import { WORKER_STATUS } from "../../workers/constants/worker-status";
-import type { Worker } from "../../workers/types/worker.types";
+import type { JobPost } from "../types/job-post.types";
 
 const MATCHABLE_WORKER_STATUSES = [
   WORKER_STATUS.NEW,
@@ -10,33 +10,33 @@ const MATCHABLE_WORKER_STATUSES = [
 ];
 
 export type WorkerJobMatch = {
-  worker: Worker;
+  worker: WorkerRecord;
   score: number;
   isMatch: boolean;
   matchedReasons: string[];
   unmatchedReasons: string[];
 };
 
-function hasRegionMatch(jobPost: JobPost, worker: Worker) {
+function hasRegionMatch(jobPost: JobPost, worker: WorkerRecord) {
   if (!jobPost.region) {
     return true;
   }
 
   return (
     worker.mainRegion === jobPost.region ||
-    worker.availableRegions.some((region) => region === jobPost.region)
+    worker.availableRegions.includes(jobPost.region)
   );
 }
 
-function hasJobTypeMatch(jobPost: JobPost, worker: Worker) {
+function hasJobTypeMatch(jobPost: JobPost, worker: WorkerRecord) {
   if (jobPost.jobTypes.length === 0) {
     return true;
   }
 
-  return worker.jobTypes.some((jobType) => jobPost.jobTypes.includes(jobType));
+  return jobPost.jobTypes.some((jobType) => worker.jobTypes.includes(jobType));
 }
 
-function hasCareerMatch(jobPost: JobPost, worker: Worker) {
+function hasCareerMatch(jobPost: JobPost, worker: WorkerRecord) {
   if (jobPost.careerYears === null) {
     return true;
   }
@@ -48,7 +48,7 @@ function hasCareerMatch(jobPost: JobPost, worker: Worker) {
   return worker.careerYears >= jobPost.careerYears;
 }
 
-function hasVehicleMatch(jobPost: JobPost, worker: Worker) {
+function hasVehicleMatch(jobPost: JobPost, worker: WorkerRecord) {
   if (!jobPost.requiresVehicle) {
     return true;
   }
@@ -56,7 +56,7 @@ function hasVehicleMatch(jobPost: JobPost, worker: Worker) {
   return worker.hasVehicle;
 }
 
-function hasLodgingMatch(jobPost: JobPost, worker: Worker) {
+function hasLodgingMatch(jobPost: JobPost, worker: WorkerRecord) {
   if (!jobPost.providesLodging) {
     return true;
   }
@@ -64,13 +64,13 @@ function hasLodgingMatch(jobPost: JobPost, worker: Worker) {
   return worker.canLodging;
 }
 
-function isMatchableWorkerStatus(worker: Worker) {
+function isMatchableWorkerStatus(worker: WorkerRecord) {
   return MATCHABLE_WORKER_STATUSES.some((status) => status === worker.status);
 }
 
 export function matchWorkersToJob(
   jobPost: JobPost,
-  workers: Worker[],
+  workers: WorkerRecord[],
 ): WorkerJobMatch[] {
   return workers
     .map((worker) => {
@@ -78,12 +78,12 @@ export function matchWorkersToJob(
       const unmatchedReasons: string[] = [];
       let score = 0;
 
+      const statusMatched = isMatchableWorkerStatus(worker);
       const regionMatched = hasRegionMatch(jobPost, worker);
       const jobTypeMatched = hasJobTypeMatch(jobPost, worker);
       const careerMatched = hasCareerMatch(jobPost, worker);
       const vehicleMatched = hasVehicleMatch(jobPost, worker);
       const lodgingMatched = hasLodgingMatch(jobPost, worker);
-      const statusMatched = isMatchableWorkerStatus(worker);
 
       if (statusMatched) {
         matchedReasons.push("소개 가능한 상태");
