@@ -14,32 +14,34 @@ export function AdminPageHeader({
   actions,
 }: AdminPageHeaderProps) {
   return (
-    <header className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0 space-y-2">
-          {eyebrow ? (
-            <p className="text-sm font-semibold text-blue-700">{eyebrow}</p>
-          ) : null}
+    <header className="overflow-hidden rounded-[28px] border border-neutral-200 bg-white shadow-sm">
+      <div className="border-b border-neutral-200 bg-gradient-to-r from-blue-900 via-blue-800 to-sky-700 px-5 py-4 sm:px-6">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            {eyebrow ? (
+              <p className="text-sm font-semibold text-blue-100">{eyebrow}</p>
+            ) : null}
 
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-950 sm:text-3xl">
+            <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
               {title}
             </h1>
-
-            {description ? (
-              <p className="max-w-3xl text-sm leading-6 text-neutral-600 sm:text-base">
-                {description}
-              </p>
-            ) : null}
           </div>
+
+          {actions ? (
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {actions}
+            </div>
+          ) : null}
         </div>
-
-        {actions ? (
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
-            {actions}
-          </div>
-        ) : null}
       </div>
+
+      {description ? (
+        <div className="bg-white px-5 py-4 sm:px-6">
+          <p className="max-w-3xl text-sm leading-6 text-neutral-600 sm:text-base">
+            {description}
+          </p>
+        </div>
+      ) : null}
     </header>
   );
 }
