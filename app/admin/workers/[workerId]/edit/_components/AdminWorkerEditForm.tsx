@@ -10,6 +10,8 @@ import { Input } from "@/shared/ui/Input";
 import { Select } from "@/shared/ui/Select";
 import { Textarea } from "@/shared/ui/Textarea";
 
+import { AdminWorkerEditSubmitButton } from "./AdminWorkerEditSubmitButton";
+
 type AdminWorkerEditFormProps = {
   worker: WorkerRecord;
 };
@@ -184,12 +186,7 @@ export function AdminWorkerEditForm({ worker }: AdminWorkerEditFormProps) {
       </section>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button
-          type="submit"
-          className="h-12 rounded-2xl bg-neutral-950 px-5 text-sm font-semibold text-white"
-        >
-          작업자 정보 저장
-        </button>
+        <AdminWorkerEditSubmitButton />
 
         <Link
           href={`/admin/workers/${worker.id}`}
