@@ -2,18 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
-import { deleteJobPostAction } from "../../../../features/jobs/actions/delete-job-post-action";
+import { AdminJobDangerZone } from "./_components/AdminJobDangerZone";
+import { AdminJobStatusForm } from "./_components/AdminJobStatusForm";
+import {
+  JOB_POST_STATUS_LABELS,
+} from "../../../../features/jobs/constants/job-post-status";
 import { matchWorkersToJob } from "../../../../features/jobs/matching/match-workers-to-job";
 import { getJobPost } from "../../../../features/jobs/server/get-job-post";
 import { getWorkerRecords } from "../../../../features/workers/server/get-worker-records";
 import { WORKER_STATUS_LABELS } from "../../../../features/workers/constants/worker-status";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
-
-const JOB_POST_STATUS_LABELS: Record<string, string> = {
-  open: "모집중",
-  paused: "일시중지",
-  closed: "마감",
-};
 
 const JOB_POST_SOURCE_LABELS: Record<string, string> = {
   manual: "직접 등록",
@@ -151,6 +149,11 @@ export default async function AdminJobDetailPage({
             </Link>
           </div>
         </header>
+
+        <AdminJobStatusForm
+          jobPostId={jobPost.id}
+          currentStatus={jobPost.status}
+        />
 
         <section className="grid gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
           <div>
@@ -453,34 +456,7 @@ export default async function AdminJobDetailPage({
           )}
         </section>
 
-        <section className="rounded-3xl border border-red-500/30 bg-red-950/20 p-6">
-          <h2 className="text-xl font-bold text-red-200">위험 작업</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            이 구인 공고를 삭제하면 공고 목록과 상세 화면에서 더 이상 확인할
-            수 없습니다. 테스트 공고나 잘못 등록된 공고만 삭제하세요.
-          </p>
-
-          <form action={deleteJobPostAction} className="mt-4 grid gap-4">
-            <input type="hidden" name="jobPostId" value={jobPost.id} />
-
-            <label className="flex gap-3 rounded-2xl border border-red-500/30 bg-red-950/40 p-4 text-sm font-semibold leading-6 text-red-100">
-              <input
-                type="checkbox"
-                name="confirmDelete"
-                required
-                className="mt-1 h-4 w-4"
-              />
-              <span>삭제하면 되돌릴 수 없다는 것을 확인했습니다.</span>
-            </label>
-
-            <button
-              type="submit"
-              className="h-11 w-fit rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white transition hover:bg-red-500"
-            >
-              확인 후 구인 공고 삭제
-            </button>
-          </form>
-        </section>
+        <AdminJobDangerZone jobPostId={jobPost.id} />
       </div>
     </main>
   );
