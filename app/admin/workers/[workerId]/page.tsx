@@ -11,6 +11,7 @@ import {
 import { getWorkerRecord } from "../../../../features/workers/server/get-worker-record";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
+import { AdminWorkerDeleteSubmitButton } from "./_components/AdminWorkerDeleteSubmitButton";
 import { AdminWorkerStatusSubmitButton } from "./_components/AdminWorkerStatusSubmitButton";
 
 export const dynamic = "force-dynamic";
@@ -189,12 +190,7 @@ export default async function AdminWorkerDetailPage({
               <span>삭제하면 되돌릴 수 없다는 것을 확인했습니다.</span>
             </label>
 
-            <button
-              type="submit"
-              className="h-11 w-fit rounded-2xl bg-red-600 px-4 text-sm font-semibold text-white"
-            >
-              확인 후 작업자 삭제
-            </button>
+            <AdminWorkerDeleteSubmitButton />
           </form>
         </section>
       </div>
