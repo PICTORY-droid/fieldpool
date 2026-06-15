@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useTransition, type FormEvent, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useTransition,
+  type FormEvent,
+  type ReactNode,
+} from "react";
 
 import {
   createWorkerAction,
@@ -13,12 +20,22 @@ type RegisterFormProps = {
   children: ReactNode;
 };
 
+const RegisterFormPendingContext = createContext(false);
+
+export function useRegisterFormPending() {
+  return useContext(RegisterFormPendingContext);
+}
+
 export function RegisterForm({ children }: RegisterFormProps) {
   const [result, setResult] = useState<CreateWorkerActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isPending) {
+      return;
+    }
 
     const formData = new FormData(event.currentTarget);
 
@@ -30,14 +47,18 @@ export function RegisterForm({ children }: RegisterFormProps) {
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-      {children}
+    <form
+      aria-busy={isPending}
+      className="flex flex-col gap-6"
+      onSubmit={handleSubmit}
+    >
+      <RegisterFormPendingContext.Provider value={isPending}>
+        {children}
+      </RegisterFormPendingContext.Provider>
 
       {result ? <RegisterFormErrors errors={result.errors} /> : null}
 
-      {result?.ok && result.preview ? (
-        <RegisterFormMessage />
-      ) : null}
+      {result?.ok && result.preview ? <RegisterFormMessage /> : null}
 
       {isPending ? (
         <p className="text-center text-sm text-neutral-500">
