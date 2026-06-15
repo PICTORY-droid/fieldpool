@@ -41,6 +41,22 @@ export type CreateWorkerInput = {
   consentPrivacy: boolean;
 };
 
+export type UpdateWorkerInput = {
+  name: string;
+  phone: string;
+  birthYear?: number | null;
+  gender?: "male" | "female" | "unknown";
+  mainRegion: Region;
+  availableRegions: Region[];
+  jobTypes: JobType[];
+  careerYears?: number | null;
+  desiredPay?: number | null;
+  hasVehicle?: boolean;
+  canLodging?: boolean;
+  languages?: LanguageOption[];
+  memo?: string | null;
+};
+
 export type WorkerFilter = {
   keyword?: string;
   region?: Region;

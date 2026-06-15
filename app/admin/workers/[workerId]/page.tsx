@@ -62,9 +62,18 @@ export default async function AdminWorkerDetailPage({
               </p>
             </div>
 
-            <span className="w-fit rounded-full bg-neutral-100 px-3 py-1 text-sm font-semibold text-neutral-700">
-              {formatWorkerStatus(worker.status)}
-            </span>
+            <div className="flex flex-col gap-3 sm:items-end">
+              <span className="w-fit rounded-full bg-neutral-100 px-3 py-1 text-sm font-semibold text-neutral-700">
+                {formatWorkerStatus(worker.status)}
+              </span>
+
+              <Link
+                href={`/admin/workers/${worker.id}/edit`}
+                className="inline-flex h-10 items-center justify-center rounded-2xl border border-neutral-300 px-4 text-sm font-semibold text-neutral-700"
+              >
+                작업자 정보 수정
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -181,9 +190,7 @@ export default async function AdminWorkerDetailPage({
                 required
                 className="mt-1 h-4 w-4"
               />
-              <span>
-                삭제하면 되돌릴 수 없다는 것을 확인했습니다.
-              </span>
+              <span>삭제하면 되돌릴 수 없다는 것을 확인했습니다.</span>
             </label>
 
             <button
