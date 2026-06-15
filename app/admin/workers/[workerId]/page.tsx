@@ -11,6 +11,7 @@ import {
 import { getWorkerRecord } from "../../../../features/workers/server/get-worker-record";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
+import { AdminWorkerStatusSubmitButton } from "./_components/AdminWorkerStatusSubmitButton";
 
 export const dynamic = "force-dynamic";
 
@@ -101,12 +102,7 @@ export default async function AdminWorkerDetailPage({
               </select>
             </label>
 
-            <button
-              type="submit"
-              className="h-12 rounded-2xl bg-neutral-950 px-4 text-sm font-semibold text-white"
-            >
-              상태 저장
-            </button>
+            <AdminWorkerStatusSubmitButton />
           </form>
         </section>
 
