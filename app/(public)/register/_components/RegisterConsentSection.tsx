@@ -8,8 +8,8 @@ export function RegisterConsentSection() {
           개인정보 동의
         </h2>
         <p className="text-sm leading-6 text-neutral-600">
-          현장 소개 상담과 연락을 위해 필요한 최소한의 개인정보 수집 동의를
-          받는 영역입니다.
+          현장 소개 상담과 연락을 위해 개인정보 수집 및 이용 동의가
+          필요합니다.
         </p>
       </div>
 

@@ -9,8 +9,8 @@ export function RegisterDetailInfoSection() {
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-neutral-950">상세 정보</h2>
         <p className="text-sm leading-6 text-neutral-600">
-          경력, 희망 일당, 차량 보유 여부, 숙소 가능 여부, 사용 언어를
-          입력받는 영역입니다.
+          경력, 희망 일당, 차량 보유 여부, 숙소 가능 여부, 사용 언어를 입력해
+          주세요.
         </p>
       </div>
 

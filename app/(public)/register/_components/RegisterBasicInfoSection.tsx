@@ -7,7 +7,7 @@ export function RegisterBasicInfoSection() {
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-neutral-950">기본 정보</h2>
         <p className="text-sm leading-6 text-neutral-600">
-          담당자가 연락할 수 있도록 이름과 연락처를 입력받는 영역입니다.
+          이름과 연락처를 정확히 입력해 주세요.
         </p>
       </div>
 

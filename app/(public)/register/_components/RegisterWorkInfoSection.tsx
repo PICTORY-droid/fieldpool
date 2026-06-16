@@ -9,7 +9,7 @@ export function RegisterWorkInfoSection() {
       <div className="space-y-1">
         <h2 className="text-lg font-semibold text-neutral-950">근무 정보</h2>
         <p className="text-sm leading-6 text-neutral-600">
-          가능한 공종과 주 근무 지역을 입력받는 영역입니다.
+          근무 가능한 지역과 공종을 선택해 주세요.
         </p>
       </div>
 
