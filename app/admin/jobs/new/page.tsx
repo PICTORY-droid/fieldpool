@@ -1,6 +1,10 @@
 import Link from "next/link";
 
+import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
+import { AdminContent } from "../../_components/AdminContent";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
+import { AdminPageHeader } from "../../_components/AdminPageHeader";
+import { AdminPageShell } from "../../_components/AdminPageShell";
 import { createJobPostAction } from "../../../../features/jobs/actions/create-job-post-action";
 import { requireAdminAuth } from "../../../../server/security/admin-auth";
 import { AdminJobCreateSubmitButton } from "./_components/AdminJobCreateSubmitButton";
@@ -41,92 +45,160 @@ const JOB_TYPE_OPTIONS = [
   "보통인부",
 ];
 
+function FieldSection({
+  children,
+  description,
+  title,
+}: {
+  children: React.ReactNode;
+  description: string;
+  title: string;
+}) {
+  return (
+    <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div>
+        <p className="text-sm font-semibold text-blue-700">입력 항목</p>
+        <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
+          {title}
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
+      </div>
+
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
+function TextInput({
+  label,
+  name,
+  placeholder,
+  required = false,
+  type = "text",
+}: {
+  label: string;
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  type?: string;
+}) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <input
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+      />
+    </label>
+  );
+}
+
+function NumberInput({
+  label,
+  min,
+  name,
+  placeholder,
+}: {
+  label: string;
+  min: string;
+  name: string;
+  placeholder?: string;
+}) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <input
+        name={name}
+        type="number"
+        min={min}
+        placeholder={placeholder}
+        className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+      />
+    </label>
+  );
+}
+
+function DateInput({ label, name }: { label: string; name: string }) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-sm font-semibold text-slate-700">{label}</span>
+      <input
+        name={name}
+        type="date"
+        className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+      />
+    </label>
+  );
+}
+
 export default async function AdminNewJobPage() {
   await requireAdminAuth();
 
   return (
-    <main className="min-h-screen bg-slate-950 px-5 py-8 text-slate-100">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        <header className="flex flex-col gap-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/30">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-cyan-300">
-                Fieldpool 관리자
-              </p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight">
-                새 구인 공고 등록
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
-                현장명, 지역, 공종, 인원, 일당 조건을 입력해 내부 구인 공고를
-                등록합니다.
-              </p>
-            </div>
+    <AdminPageShell>
+      <AdminBreadcrumbs
+        items={[
+          { href: "/admin/jobs", label: "구인공고 목록" },
+          { label: "새 구인공고 등록" },
+        ]}
+      />
+
+      <AdminPageHeader
+        eyebrow="구인공고 등록"
+        title="새 구인공고 등록"
+        description="현장명, 지역, 공종, 인원, 일당 조건을 입력해 내부 구인공고를 등록합니다."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/jobs"
+              className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-blue-800 shadow-sm transition hover:bg-blue-50"
+            >
+              구인공고 목록
+            </Link>
+
+            <Link
+              href="/admin/workers"
+              className="inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              작업자 목록
+            </Link>
 
             <AdminLogoutButton />
           </div>
+        }
+      />
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/jobs"
-              className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-            >
-              구인 공고 목록으로
-            </Link>
-            <Link
-              href="/admin/workers"
-              className="rounded-full border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
-            >
-              작업자 목록으로
-            </Link>
-          </div>
-        </header>
-
-        <form
-          action={createJobPostAction}
-          className="grid gap-6 rounded-3xl border border-slate-800 bg-slate-900/70 p-6"
-        >
-          <section className="grid gap-4">
-            <div>
-              <h2 className="text-xl font-bold">기본 정보</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                관리자 화면과 매칭 기준에 먼저 쓰이는 정보입니다.
-              </p>
-            </div>
-
+      <AdminContent>
+        <form action={createJobPostAction} className="grid gap-5">
+          <FieldSection
+            title="기본 정보"
+            description="관리자 목록과 상세 화면에 먼저 표시되는 현장 기본 정보입니다."
+          >
             <div className="grid gap-4 sm:grid-cols-2">
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-200">
-                  공고명
-                </span>
-                <input
-                  name="title"
-                  type="text"
-                  required
-                  placeholder="예, 세종 철근 작업자 모집"
-                  className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                />
-              </label>
+              <TextInput
+                name="title"
+                label="공고명"
+                required
+                placeholder="예, 세종 철근 작업자 모집"
+              />
+
+              <TextInput
+                name="siteName"
+                label="현장명"
+                placeholder="예, 세종 공동주택 현장"
+              />
 
               <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-200">
-                  현장명
-                </span>
-                <input
-                  name="siteName"
-                  type="text"
-                  placeholder="예, 세종 공동주택 현장"
-                  className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                />
-              </label>
-
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-200">
+                <span className="text-sm font-semibold text-slate-700">
                   지역
                 </span>
                 <select
                   name="region"
                   defaultValue=""
-                  className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300"
+                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 >
                   <option value="">지역 선택</option>
                   {REGION_OPTIONS.map((region) => (
@@ -137,44 +209,34 @@ export default async function AdminNewJobPage() {
                 </select>
               </label>
 
-              <label className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-200">
-                  주소
-                </span>
-                <input
-                  name="address"
-                  type="text"
-                  placeholder="예, 세종특별자치시 조치원읍"
-                  className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                />
-              </label>
+              <TextInput
+                name="address"
+                label="주소"
+                placeholder="예, 세종특별자치시 조치원읍"
+              />
             </div>
-          </section>
+          </FieldSection>
 
-          <section className="grid gap-4">
-            <div>
-              <h2 className="text-xl font-bold">모집 조건</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                작업자 자동 매칭에 사용할 조건입니다.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
+          <FieldSection
+            title="모집 조건"
+            description="작업자 매칭에 사용할 공종, 인원, 기간, 경력 조건입니다."
+          >
+            <div className="grid gap-5">
               <div className="grid gap-2">
-                <span className="text-sm font-semibold text-slate-200">
+                <span className="text-sm font-semibold text-slate-700">
                   필요 공종
                 </span>
-                <div className="grid gap-2 rounded-2xl border border-slate-800 bg-slate-950/50 p-4 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2 md:grid-cols-3">
                   {JOB_TYPE_OPTIONS.map((jobType) => (
                     <label
                       key={jobType}
-                      className="flex items-center gap-2 text-sm text-slate-300"
+                      className="flex items-center gap-2 text-sm font-medium text-slate-700"
                     >
                       <input
                         name="jobTypes"
                         type="checkbox"
                         value={jobType}
-                        className="h-4 w-4 rounded border-slate-600 bg-slate-950"
+                        className="h-4 w-4 rounded border-slate-300"
                       />
                       <span>{jobType}</span>
                     </label>
@@ -183,75 +245,39 @@ export default async function AdminNewJobPage() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
-                    필요 인원
-                  </span>
-                  <input
-                    name="neededCount"
-                    type="number"
-                    min="1"
-                    placeholder="예, 3"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                  />
-                </label>
+                <NumberInput
+                  name="neededCount"
+                  label="필요 인원"
+                  min="1"
+                  placeholder="예, 3"
+                />
+
+                <NumberInput
+                  name="pay"
+                  label="일당"
+                  min="0"
+                  placeholder="예, 180000"
+                />
+
+                <DateInput name="startDate" label="시작일" />
+
+                <DateInput name="endDate" label="종료일" />
+
+                <NumberInput
+                  name="careerYears"
+                  label="필요 경력"
+                  min="0"
+                  placeholder="예, 3"
+                />
 
                 <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
-                    일당
-                  </span>
-                  <input
-                    name="pay"
-                    type="number"
-                    min="0"
-                    placeholder="예, 180000"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                  />
-                </label>
-
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
-                    시작일
-                  </span>
-                  <input
-                    name="startDate"
-                    type="date"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300"
-                  />
-                </label>
-
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
-                    종료일
-                  </span>
-                  <input
-                    name="endDate"
-                    type="date"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300"
-                  />
-                </label>
-
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
-                    필요 경력
-                  </span>
-                  <input
-                    name="careerYears"
-                    type="number"
-                    min="0"
-                    placeholder="예, 3"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
-                  />
-                </label>
-
-                <label className="grid gap-2">
-                  <span className="text-sm font-semibold text-slate-200">
+                  <span className="text-sm font-semibold text-slate-700">
                     공고 상태
                   </span>
                   <select
                     name="status"
                     defaultValue="open"
-                    className="rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300"
+                    className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                   >
                     <option value="open">모집중</option>
                     <option value="paused">일시중지</option>
@@ -260,50 +286,46 @@ export default async function AdminNewJobPage() {
                 </label>
               </div>
 
-              <div className="grid gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
-                <label className="flex items-center gap-3 text-sm font-semibold text-slate-200">
+              <div className="grid gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                <label className="flex items-center gap-3 text-sm font-semibold text-blue-950">
                   <input
                     name="requiresVehicle"
                     type="checkbox"
                     value="true"
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-950"
+                    className="h-4 w-4 rounded border-blue-300"
                   />
                   차량 보유 작업자 필요
                 </label>
 
-                <label className="flex items-center gap-3 text-sm font-semibold text-slate-200">
+                <label className="flex items-center gap-3 text-sm font-semibold text-blue-950">
                   <input
                     name="providesLodging"
                     type="checkbox"
                     value="true"
-                    className="h-4 w-4 rounded border-slate-600 bg-slate-950"
+                    className="h-4 w-4 rounded border-blue-300"
                   />
                   숙소 제공
                 </label>
               </div>
             </div>
-          </section>
+          </FieldSection>
 
-          <section className="grid gap-4">
-            <div>
-              <h2 className="text-xl font-bold">메모</h2>
-              <p className="mt-1 text-sm text-slate-400">
-                관리자만 확인할 현장 조건이나 참고사항을 적습니다.
-              </p>
-            </div>
-
+          <FieldSection
+            title="메모"
+            description="관리자만 확인할 현장 조건이나 참고사항을 입력합니다."
+          >
             <textarea
               name="memo"
               rows={5}
               placeholder="예, 출근 시간, 준비물, 현장 담당자 참고사항"
-              className="resize-none rounded-2xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm leading-6 text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-cyan-300"
+              className="w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
-          </section>
+          </FieldSection>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:justify-end sm:p-6">
             <Link
               href="/admin/jobs"
-              className="rounded-full border border-slate-700 px-5 py-3 text-center text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-cyan-200"
+              className="inline-flex items-center justify-center rounded-2xl border border-slate-300 bg-white px-5 py-3 text-center text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-800"
             >
               취소
             </Link>
@@ -311,7 +333,7 @@ export default async function AdminNewJobPage() {
             <AdminJobCreateSubmitButton />
           </div>
         </form>
-      </div>
-    </main>
+      </AdminContent>
+    </AdminPageShell>
   );
 }
