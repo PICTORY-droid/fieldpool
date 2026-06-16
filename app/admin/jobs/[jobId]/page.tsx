@@ -2,10 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
+import { AdminCard } from "../../_components/AdminCard";
 import { AdminContent } from "../../_components/AdminContent";
+import { AdminInfoGrid, AdminInfoItem } from "../../_components/AdminInfoItem";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
 import { AdminPageHeader } from "../../_components/AdminPageHeader";
 import { AdminPageShell } from "../../_components/AdminPageShell";
+import { AdminSection } from "../../_components/AdminSection";
+import { AdminSectionHeader } from "../../_components/AdminSectionHeader";
 import { JOB_POST_STATUS_LABELS } from "../../../../features/jobs/constants/job-post-status";
 import { matchWorkersToJob } from "../../../../features/jobs/matching/match-workers-to-job";
 import { getJobPost } from "../../../../features/jobs/server/get-job-post";
@@ -103,17 +107,6 @@ function formatJobStatus(status: string) {
   );
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-900">
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function MatchReasonBox({
   label,
   tone,
@@ -198,7 +191,7 @@ export default async function AdminJobDetailPage({
 
       <AdminContent>
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">모집 상태</p>
             <div className="mt-3">
               <span
@@ -214,9 +207,9 @@ export default async function AdminJobDetailPage({
             <p className="mt-3 text-sm leading-6 text-slate-600">
               상태 변경은 아래 상태 저장 영역에서 처리합니다.
             </p>
-          </div>
+          </AdminCard>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">전체 후보</p>
             <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
               {workerMatches.length.toLocaleString("ko-KR")}명
@@ -224,9 +217,9 @@ export default async function AdminJobDetailPage({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               등록된 작업자 중 조건 비교 대상입니다.
             </p>
-          </div>
+          </AdminCard>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">완전 일치</p>
             <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
               {exactMatchCount.toLocaleString("ko-KR")}명
@@ -234,7 +227,7 @@ export default async function AdminJobDetailPage({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               지역, 공종, 경력, 차량, 숙소 조건이 맞는 작업자입니다.
             </p>
-          </div>
+          </AdminCard>
         </section>
 
         <AdminJobStatusForm
@@ -242,88 +235,63 @@ export default async function AdminJobDetailPage({
           currentStatus={jobPost.status}
         />
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">기본 정보</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              현장과 공고 정보
-            </h2>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoItem label="공고명" value={jobPost.title} />
-            <InfoItem label="현장명" value={jobPost.siteName || "-"} />
-            <InfoItem label="지역" value={jobPost.region || "-"} />
-            <InfoItem label="주소" value={jobPost.address || "-"} />
-            <InfoItem label="상태" value={formatJobStatus(jobPost.status)} />
-            <InfoItem
+        <AdminSection eyebrow="기본 정보" title="현장과 공고 정보">
+          <AdminInfoGrid>
+            <AdminInfoItem label="공고명" value={jobPost.title} />
+            <AdminInfoItem label="현장명" value={jobPost.siteName || "-"} />
+            <AdminInfoItem label="지역" value={jobPost.region || "-"} />
+            <AdminInfoItem label="주소" value={jobPost.address || "-"} />
+            <AdminInfoItem label="상태" value={formatJobStatus(jobPost.status)} />
+            <AdminInfoItem
               label="등록 방식"
               value={
                 JOB_POST_SOURCE_LABELS[jobPost.sourceType] ??
                 jobPost.sourceType
               }
             />
-            <InfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
-          </div>
-        </section>
+            <AdminInfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
+          </AdminInfoGrid>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">모집 조건</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              작업자 매칭 조건
-            </h2>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoItem
+        <AdminSection eyebrow="모집 조건" title="작업자 매칭 조건">
+          <AdminInfoGrid>
+            <AdminInfoItem
               label="필요 공종"
               value={
                 jobPost.jobTypes.length > 0 ? jobPost.jobTypes.join(", ") : "-"
               }
             />
-            <InfoItem
+            <AdminInfoItem
               label="필요 인원"
               value={formatNeededCount(jobPost.neededCount)}
             />
-            <InfoItem label="일당" value={formatPay(jobPost.pay)} />
-            <InfoItem label="시작일" value={formatDate(jobPost.startDate)} />
-            <InfoItem label="종료일" value={formatDate(jobPost.endDate)} />
-            <InfoItem
+            <AdminInfoItem label="일당" value={formatPay(jobPost.pay)} />
+            <AdminInfoItem label="시작일" value={formatDate(jobPost.startDate)} />
+            <AdminInfoItem label="종료일" value={formatDate(jobPost.endDate)} />
+            <AdminInfoItem
               label="필요 경력"
               value={formatCareerYears(jobPost.careerYears)}
             />
-            <InfoItem label="차량" value={formatVehicle(jobPost.requiresVehicle)} />
-            <InfoItem label="숙소" value={formatLodging(jobPost.providesLodging)} />
-          </div>
-        </section>
+            <AdminInfoItem label="차량" value={formatVehicle(jobPost.requiresVehicle)} />
+            <AdminInfoItem label="숙소" value={formatLodging(jobPost.providesLodging)} />
+          </AdminInfoGrid>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">메모</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              관리자 참고사항
-            </h2>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+        <AdminSection eyebrow="메모" title="관리자 참고사항">
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
             <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
               {jobPost.memo || "등록된 메모가 없습니다."}
             </p>
           </div>
-        </section>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <AdminCard>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-blue-700">매칭 작업자</p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-                작업자 조건 비교
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                지역, 공종, 경력, 차량, 숙소 조건으로 작업자를 비교합니다.
-              </p>
-            </div>
+            <AdminSectionHeader
+              eyebrow="매칭 작업자"
+              title="작업자 조건 비교"
+              description="지역, 공종, 경력, 차량, 숙소 조건으로 작업자를 비교합니다."
+            />
 
             <div className="flex flex-wrap gap-2">
               <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">
@@ -387,47 +355,49 @@ export default async function AdminJobDetailPage({
                     </Link>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    <InfoItem
-                      label="주 근무지역"
-                      value={match.worker.mainRegion || "-"}
-                    />
-                    <InfoItem
-                      label="가능 지역"
-                      value={
-                        match.worker.availableRegions.length > 0
-                          ? match.worker.availableRegions.join(", ")
-                          : "-"
-                      }
-                    />
-                    <InfoItem
-                      label="공종"
-                      value={
-                        match.worker.jobTypes.length > 0
-                          ? match.worker.jobTypes.join(", ")
-                          : "-"
-                      }
-                    />
-                    <InfoItem
-                      label="경력"
-                      value={
-                        match.worker.careerYears === null
-                          ? "-"
-                          : `${match.worker.careerYears}년`
-                      }
-                    />
-                    <InfoItem
-                      label="희망 일당"
-                      value={formatPay(match.worker.desiredPay)}
-                    />
-                    <InfoItem
-                      label="차량"
-                      value={formatWorkerVehicle(match.worker.hasVehicle)}
-                    />
-                    <InfoItem
-                      label="숙소"
-                      value={formatWorkerLodging(match.worker.canLodging)}
-                    />
+                  <div className="mt-5">
+                    <AdminInfoGrid>
+                      <AdminInfoItem
+                        label="주 근무지역"
+                        value={match.worker.mainRegion || "-"}
+                      />
+                      <AdminInfoItem
+                        label="가능 지역"
+                        value={
+                          match.worker.availableRegions.length > 0
+                            ? match.worker.availableRegions.join(", ")
+                            : "-"
+                        }
+                      />
+                      <AdminInfoItem
+                        label="공종"
+                        value={
+                          match.worker.jobTypes.length > 0
+                            ? match.worker.jobTypes.join(", ")
+                            : "-"
+                        }
+                      />
+                      <AdminInfoItem
+                        label="경력"
+                        value={
+                          match.worker.careerYears === null
+                            ? "-"
+                            : `${match.worker.careerYears}년`
+                        }
+                      />
+                      <AdminInfoItem
+                        label="희망 일당"
+                        value={formatPay(match.worker.desiredPay)}
+                      />
+                      <AdminInfoItem
+                        label="차량"
+                        value={formatWorkerVehicle(match.worker.hasVehicle)}
+                      />
+                      <AdminInfoItem
+                        label="숙소"
+                        value={formatWorkerLodging(match.worker.canLodging)}
+                      />
+                    </AdminInfoGrid>
                   </div>
 
                   <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -455,7 +425,7 @@ export default async function AdminJobDetailPage({
               ))}
             </div>
           )}
-        </section>
+        </AdminCard>
 
         <AdminJobDangerZone jobPostId={jobPost.id} />
       </AdminContent>
