@@ -2,10 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AdminBreadcrumbs } from "../../_components/AdminBreadcrumbs";
+import { AdminCard } from "../../_components/AdminCard";
 import { AdminContent } from "../../_components/AdminContent";
+import { AdminInfoGrid, AdminInfoItem } from "../../_components/AdminInfoItem";
 import { AdminLogoutButton } from "../../_components/AdminLogoutButton";
 import { AdminPageHeader } from "../../_components/AdminPageHeader";
 import { AdminPageShell } from "../../_components/AdminPageShell";
+import { AdminSection } from "../../_components/AdminSection";
+import { AdminSectionHeader } from "../../_components/AdminSectionHeader";
 import { deleteWorkerAction } from "../../../../features/workers/actions/delete-worker-action";
 import { updateWorkerStatusAction } from "../../../../features/workers/actions/update-worker-status-action";
 import {
@@ -84,17 +88,6 @@ function formatDateTime(value: Date | string | null) {
   });
 }
 
-function InfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-900">
-        {value}
-      </p>
-    </div>
-  );
-}
-
 export default async function AdminWorkerDetailPage({
   params,
 }: {
@@ -138,7 +131,7 @@ export default async function AdminWorkerDetailPage({
 
       <AdminContent>
         <section className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">현재 상태</p>
             <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
               {formatWorkerStatus(worker.status)}
@@ -146,9 +139,9 @@ export default async function AdminWorkerDetailPage({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               상태 저장 영역에서 작업자 진행 단계를 변경합니다.
             </p>
-          </div>
+          </AdminCard>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">연락처</p>
             <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
               {worker.phone}
@@ -156,9 +149,9 @@ export default async function AdminWorkerDetailPage({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               중복 등록을 막기 위해 연락처는 고유값으로 관리됩니다.
             </p>
-          </div>
+          </AdminCard>
 
-          <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <AdminCard>
             <p className="text-sm font-medium text-slate-500">등록일</p>
             <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
               {formatDateTime(worker.createdAt)}
@@ -166,20 +159,16 @@ export default async function AdminWorkerDetailPage({
             <p className="mt-2 text-sm leading-6 text-slate-600">
               최근 등록 작업자를 기준으로 목록에 표시됩니다.
             </p>
-          </div>
+          </AdminCard>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <AdminCard>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-blue-700">상태 변경</p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-                작업자 상태
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                상담, 소개 가능, 비활성 같은 작업자 관리 상태를 저장합니다.
-              </p>
-            </div>
+            <AdminSectionHeader
+              eyebrow="상태 변경"
+              title="작업자 상태"
+              description="상담, 소개 가능, 비활성 같은 작업자 관리 상태를 저장합니다."
+            />
 
             <form
               action={updateWorkerStatusAction}
@@ -210,91 +199,70 @@ export default async function AdminWorkerDetailPage({
               <AdminWorkerStatusSubmitButton />
             </form>
           </div>
-        </section>
+        </AdminCard>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">기본 정보</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              작업자 기본 정보
-            </h2>
-          </div>
+        <AdminSection eyebrow="기본 정보" title="작업자 기본 정보">
+          <AdminInfoGrid>
+            <AdminInfoItem label="이름" value={worker.name} />
+            <AdminInfoItem label="연락처" value={worker.phone} />
+            <AdminInfoItem
+              label="출생연도"
+              value={formatNullable(worker.birthYear)}
+            />
+            <AdminInfoItem label="성별" value={formatGender(worker.gender)} />
+            <AdminInfoItem label="주 근무지역" value={worker.mainRegion} />
+            <AdminInfoItem
+              label="가능 지역"
+              value={formatList(worker.availableRegions)}
+            />
+          </AdminInfoGrid>
+        </AdminSection>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoItem label="이름" value={worker.name} />
-            <InfoItem label="연락처" value={worker.phone} />
-            <InfoItem label="출생연도" value={formatNullable(worker.birthYear)} />
-            <InfoItem label="성별" value={formatGender(worker.gender)} />
-            <InfoItem label="주 근무지역" value={worker.mainRegion} />
-            <InfoItem label="가능 지역" value={formatList(worker.availableRegions)} />
-          </div>
-        </section>
+        <AdminSection eyebrow="근무 정보" title="공종과 근무 조건">
+          <AdminInfoGrid>
+            <AdminInfoItem label="공종" value={formatList(worker.jobTypes)} />
+            <AdminInfoItem label="경력" value={`${worker.careerYears}년`} />
+            <AdminInfoItem
+              label="희망 일당"
+              value={formatNullable(worker.desiredPay)}
+            />
+            <AdminInfoItem label="차량" value={formatBoolean(worker.hasVehicle)} />
+            <AdminInfoItem label="숙소" value={formatBoolean(worker.canLodging)} />
+            <AdminInfoItem label="언어" value={formatList(worker.languages)} />
+          </AdminInfoGrid>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">근무 정보</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              공종과 근무 조건
-            </h2>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoItem label="공종" value={formatList(worker.jobTypes)} />
-            <InfoItem label="경력" value={`${worker.careerYears}년`} />
-            <InfoItem label="희망 일당" value={formatNullable(worker.desiredPay)} />
-            <InfoItem label="차량" value={formatBoolean(worker.hasVehicle)} />
-            <InfoItem label="숙소" value={formatBoolean(worker.canLodging)} />
-            <InfoItem label="언어" value={formatList(worker.languages)} />
-          </div>
-        </section>
-
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">메모</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              관리자 메모
-            </h2>
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+        <AdminSection eyebrow="메모" title="관리자 메모">
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
             <p className="whitespace-pre-wrap text-sm leading-6 text-slate-700">
               {worker.memo || "-"}
             </p>
           </div>
-        </section>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <div>
-            <p className="text-sm font-semibold text-blue-700">관리 정보</p>
-            <h2 className="mt-2 text-xl font-bold tracking-tight text-slate-950">
-              등록 및 동의 정보
-            </h2>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <InfoItem
+        <AdminSection eyebrow="관리 정보" title="등록 및 동의 정보">
+          <AdminInfoGrid>
+            <AdminInfoItem
               label="개인정보 동의"
               value={formatConsent(worker.consentPrivacy)}
             />
-            <InfoItem label="등록일" value={formatDateTime(worker.createdAt)} />
-            <InfoItem label="수정일" value={formatDateTime(worker.updatedAt)} />
-          </div>
-        </section>
+            <AdminInfoItem label="등록일" value={formatDateTime(worker.createdAt)} />
+            <AdminInfoItem label="수정일" value={formatDateTime(worker.updatedAt)} />
+          </AdminInfoGrid>
+        </AdminSection>
 
-        <section className="rounded-3xl border border-red-200 bg-red-50 p-5 shadow-sm sm:p-6">
+        <AdminCard tone="red">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-red-700">위험 작업</p>
-              <h2 className="mt-2 text-xl font-bold tracking-tight text-red-950">
-                작업자 삭제
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-red-800">
-                삭제한 작업자는 목록과 상세 화면에서 제거됩니다. 테스트가 필요하면
-                김서인 작업자는 삭제하지 말고 임시 작업자를 새로 등록해서 확인하세요.
-              </p>
-            </div>
+            <AdminSectionHeader
+              eyebrow="위험 작업"
+              title="작업자 삭제"
+              description="삭제한 작업자는 목록과 상세 화면에서 제거됩니다. 테스트가 필요하면 김서인 작업자는 삭제하지 말고 임시 작업자를 새로 등록해서 확인하세요."
+            />
 
-            <form action={deleteWorkerAction} className="flex flex-col gap-3 sm:min-w-80">
+            <form
+              action={deleteWorkerAction}
+              className="flex flex-col gap-3 sm:min-w-80"
+            >
               <input type="hidden" name="workerId" value={worker.id} />
 
               <label className="flex items-start gap-3 rounded-2xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-900">
@@ -310,7 +278,7 @@ export default async function AdminWorkerDetailPage({
               <AdminWorkerDeleteSubmitButton />
             </form>
           </div>
-        </section>
+        </AdminCard>
       </AdminContent>
     </AdminPageShell>
   );
