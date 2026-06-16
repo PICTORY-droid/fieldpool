@@ -1,9 +1,12 @@
 import Link from "next/link";
 
+import { AdminCard } from "../_components/AdminCard";
 import { AdminContent } from "../_components/AdminContent";
+import { AdminInfoGrid, AdminInfoItem } from "../_components/AdminInfoItem";
 import { AdminLogoutButton } from "../_components/AdminLogoutButton";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPageShell } from "../_components/AdminPageShell";
+import { AdminSection } from "../_components/AdminSection";
 import { getJobPosts } from "../../../features/jobs/server/get-job-posts";
 import type { JobPost } from "../../../features/jobs/types/job-post.types";
 import { requireAdminAuth } from "../../../server/security/admin-auth";
@@ -88,28 +91,22 @@ function JobSummaryCard({
   value: string;
 }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <AdminCard>
       <p className="text-sm font-medium text-slate-500">{label}</p>
       <p className="mt-3 text-2xl font-bold tracking-tight text-slate-950">
         {value}
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-    </div>
-  );
-}
-
-function JobInfoItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
-    </div>
+    </AdminCard>
   );
 }
 
 function JobPostCard({ jobPost }: { jobPost: JobPost }) {
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md sm:p-6">
+    <AdminCard
+      as="article"
+      className="transition hover:border-blue-200 hover:shadow-md"
+    >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -145,26 +142,39 @@ function JobPostCard({ jobPost }: { jobPost: JobPost }) {
         </Link>
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <JobInfoItem label="지역" value={jobPost.region || "-"} />
-        <JobInfoItem
-          label="공종"
-          value={jobPost.jobTypes.length > 0 ? jobPost.jobTypes.join(", ") : "-"}
-        />
-        <JobInfoItem label="필요 인원" value={formatCount(jobPost.neededCount)} />
-        <JobInfoItem label="일당" value={formatCurrency(jobPost.pay)} />
-        <JobInfoItem
-          label="근무 시작"
-          value={formatDate(jobPost.startDate)}
-        />
-        <JobInfoItem label="근무 종료" value={formatDate(jobPost.endDate)} />
-        <JobInfoItem
-          label="필요 경력"
-          value={formatCareerYears(jobPost.careerYears)}
-        />
-        <JobInfoItem label="차량" value={formatBoolean(jobPost.requiresVehicle)} />
-        <JobInfoItem label="숙소" value={formatLodging(jobPost.providesLodging)} />
-        <JobInfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
+      <div className="mt-5">
+        <AdminInfoGrid>
+          <AdminInfoItem label="지역" value={jobPost.region || "-"} />
+          <AdminInfoItem
+            label="공종"
+            value={
+              jobPost.jobTypes.length > 0 ? jobPost.jobTypes.join(", ") : "-"
+            }
+          />
+          <AdminInfoItem
+            label="필요 인원"
+            value={formatCount(jobPost.neededCount)}
+          />
+          <AdminInfoItem label="일당" value={formatCurrency(jobPost.pay)} />
+          <AdminInfoItem
+            label="근무 시작"
+            value={formatDate(jobPost.startDate)}
+          />
+          <AdminInfoItem label="근무 종료" value={formatDate(jobPost.endDate)} />
+          <AdminInfoItem
+            label="필요 경력"
+            value={formatCareerYears(jobPost.careerYears)}
+          />
+          <AdminInfoItem
+            label="차량"
+            value={formatBoolean(jobPost.requiresVehicle)}
+          />
+          <AdminInfoItem
+            label="숙소"
+            value={formatLodging(jobPost.providesLodging)}
+          />
+          <AdminInfoItem label="등록일" value={formatDate(jobPost.createdAt)} />
+        </AdminInfoGrid>
       </div>
 
       {jobPost.memo ? (
@@ -175,7 +185,7 @@ function JobPostCard({ jobPost }: { jobPost: JobPost }) {
           </p>
         </div>
       ) : null}
-    </article>
+    </AdminCard>
   );
 }
 
@@ -238,13 +248,17 @@ export default async function AdminJobsPage() {
           />
         </section>
 
-        <section className="rounded-3xl border border-blue-100 bg-blue-50 p-5">
-          <p className="text-sm font-semibold text-blue-900">관리 안내</p>
-          <p className="mt-2 text-sm leading-6 text-blue-800">
-            모집중, 일시중지, 마감 상태는 공고 상세 화면에서 변경합니다. 목록에서는
-            공고 조건과 등록 상태를 먼저 확인한 뒤 상세 보기로 이동하세요.
+        <AdminSection
+          eyebrow="관리 안내"
+          title="공고 상태 관리"
+          description="모집중, 일시중지, 마감 상태는 공고 상세 화면에서 변경합니다. 목록에서는 공고 조건과 등록 상태를 먼저 확인한 뒤 상세 보기로 이동하세요."
+          tone="blue"
+        >
+          <p className="text-sm leading-6 text-blue-900">
+            작업자 매칭은 상세 화면에서 확인합니다. 조건이 맞더라도 작업자 상태가
+            비활성이면 확인 대상으로 분류됩니다.
           </p>
-        </section>
+        </AdminSection>
 
         {jobPosts.length > 0 ? (
           <section className="grid gap-4">
@@ -253,7 +267,7 @@ export default async function AdminJobsPage() {
             ))}
           </section>
         ) : (
-          <section className="rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm">
+          <AdminCard tone="dashed" className="text-center">
             <p className="text-lg font-bold text-slate-950">
               등록된 구인공고가 없습니다.
             </p>
@@ -268,7 +282,7 @@ export default async function AdminJobsPage() {
                 구인공고 등록
               </Link>
             </div>
-          </section>
+          </AdminCard>
         )}
       </AdminContent>
     </AdminPageShell>
