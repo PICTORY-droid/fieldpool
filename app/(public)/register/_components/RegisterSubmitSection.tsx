@@ -13,7 +13,7 @@ export function RegisterSubmitSection() {
       </Button>
 
       <p className="text-center text-xs leading-5 text-neutral-500">
-        등록 후 담당자가 연락처, 가능 공종, 근무 가능 지역을 확인합니다.
+        입력한 내용이 정확한지 확인한 뒤 등록해 주세요.
       </p>
     </section>
   );

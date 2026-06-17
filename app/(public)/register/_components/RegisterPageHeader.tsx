@@ -6,8 +6,8 @@ export function RegisterPageHeader() {
         건설 인력풀 등록
       </h1>
       <p className="text-sm leading-6 text-neutral-600">
-        현장 소개를 위한 기본 구직 정보를 남기는 페이지입니다. 등록 후
-        담당자가 연락처와 가능 공종을 확인합니다.
+        이름, 연락처, 가능한 공종과 근무 지역을 남겨 주세요. 입력한 정보는
+        현장 소개와 구인공고 매칭 확인에 사용됩니다.
       </p>
     </section>
   );
