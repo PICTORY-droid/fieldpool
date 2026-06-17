@@ -1,8 +1,7 @@
-import Link from "next/link";
-
 import { AdminCard } from "../_components/AdminCard";
 import { AdminContent } from "../_components/AdminContent";
 import { AdminInfoItem } from "../_components/AdminInfoItem";
+import { AdminLinkButton } from "../_components/AdminLinkButton";
 import { AdminLogoutButton } from "../_components/AdminLogoutButton";
 import { AdminPageHeader } from "../_components/AdminPageHeader";
 import { AdminPageShell } from "../_components/AdminPageShell";
@@ -36,24 +35,15 @@ export default async function AdminWorkersPage() {
 
       <AdminContent>
         <nav className="flex flex-wrap gap-3">
-          <Link
-            href="/register"
-            className="rounded-full bg-blue-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
-          >
+          <AdminLinkButton href="/register" variant="primary">
             작업자 등록
-          </Link>
-          <Link
-            href="/admin/jobs"
-            className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
-          >
+          </AdminLinkButton>
+          <AdminLinkButton href="/admin/jobs">
             구인 공고 목록으로
-          </Link>
-          <Link
-            href="/admin/external-jobs"
-            className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"
-          >
+          </AdminLinkButton>
+          <AdminLinkButton href="/admin/external-jobs">
             외부 공고 후보
-          </Link>
+          </AdminLinkButton>
         </nav>
 
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,12 +134,13 @@ export default async function AdminWorkersPage() {
                             {formatDateTime(worker.createdAt)}
                           </p>
 
-                          <Link
+                          <AdminLinkButton
                             href={`/admin/workers/${worker.id}`}
-                            className="inline-flex h-10 items-center justify-center rounded-full bg-blue-700 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800"
+                            variant="primary"
+                            size="sm"
                           >
                             상세 보기
-                          </Link>
+                          </AdminLinkButton>
                         </div>
                       </div>
                     </div>
