@@ -8,7 +8,7 @@ export function RegisterConsentSection() {
           개인정보 동의
         </h2>
         <p className="text-sm leading-6 text-neutral-600">
-          현장 소개 상담과 연락을 위해 개인정보 수집 및 이용 동의가
+          현장 소개 상담과 연락을 받으려면 개인정보 수집 및 이용 동의가
           필요합니다.
         </p>
       </div>
@@ -21,8 +21,8 @@ export function RegisterConsentSection() {
         />
 
         <p className="mt-3 text-xs leading-5 text-neutral-500">
-          입력한 정보는 구직 상담, 가능 공종 확인, 현장 소개 가능 여부 확인을
-          위해 사용됩니다.
+          입력한 정보는 구직 상담, 가능 공종 확인, 현장 소개 가능 여부 확인에만
+          사용합니다.
         </p>
       </div>
     </section>
